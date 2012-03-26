@@ -80,6 +80,23 @@ struct
       Ast.BTrue -> true
     | _ -> false
 
+  let vf_bool vf = 
+    match vf with
+      Ast.ViVirtual -> true
+    | _ -> false
+
+  let pf_bool pf = 
+    match pf with
+      Ast.PrPrivate -> true
+    | _ -> false
+
+  let mf_bool mf = 
+    match mf with
+      Ast.MuMutable -> true
+    | _ -> false
+
+
+
   let rec ident_tagname ident = 
     match ident with
       (* i . i  (keep last) *)
@@ -218,8 +235,8 @@ struct
   and class_type_info ast =
     match ast with
       (* (virtual)? i ([ t ])? *)
-    | Ast.CtCon(loc, mb, i, t) -> 
-        let line = if (mb_bool mb) then "class virtual " else "class " in
+    | Ast.CtCon(loc, vf, i, t) -> 
+        let line = if (vf_bool vf) then "class virtual " else "class " in
         let i_name = ident_tagname i in
         [make_tag i_name loc (line ^ i_name)]
       (* [t] -> ct *)
@@ -241,17 +258,17 @@ struct
     | Ast.CgSem(loc, csg1, csg2) -> 
         List.append (class_sig_item_info csg1) (class_sig_item_info csg2)
       (* method s : t or method private s : t *)
-    | Ast.CgMth(loc, s, mb, t) -> 
-        let line = if (mb_bool mb) then "method private " else "method " in
+    | Ast.CgMth(loc, s, pf, t) -> 
+        let line = if (pf_bool pf) then "method private " else "method " in
         [make_tag s loc (line ^ s)]
       (* value (virtual)? (mutable)? s : t *)
-    | Ast.CgVal(loc, s, mb1, mb2, t) -> 
-        let line1 = if (mb_bool mb1) then "virtual " else "" in
-        let line2 = if (mb_bool mb2) then "mutable " else "" in
+    | Ast.CgVal(loc, s, mf, vf, t) -> 
+        let line1 = if (mf_bool mf) then "mutable" else "" in
+        let line2 = if (vf_bool vf) then "virtual" else "" in
         [make_tag s loc (line1 ^ line2 ^ s)]
       (* method virtual (mutable)? s : t *)
-    | Ast.CgVir(loc, s, mb, t) -> 
-        let line = if (mb_bool mb) then "method virtual " else "method " in
+    | Ast.CgVir(loc, s, pf, t) -> 
+        let line = if (pf_bool pf) then "method private " else "method " in
         [make_tag s loc (line ^ s)]
     | _ -> []
   and class_str_item_info ast =
@@ -260,20 +277,20 @@ struct
       Ast.CrSem(loc, cst1, cst2) -> 
         List.append (class_str_item_info cst1) (class_str_item_info cst2)
       (* method (private)? s : t = e or method (private)? s = e *)
-    | Ast.CrMth(loc, s, mb, e, t) -> 
-        let line = if (mb_bool mb) then "method private " else "method " in
+    | Ast.CrMth(loc, s, overf, pf, e, t) -> 
+        let line = if (pf_bool pf) then "method private " else "method " in
         [make_tag s loc (line ^ s)]
       (* value (mutable)? s = e *)
-    | Ast.CrVal(loc, s, mb, e) -> 
-        let line = if (mb_bool mb) then "value mutable " else "value " in
+    | Ast.CrVal(loc, s, overf, mf, e) -> 
+        let line = if (mf_bool mf) then "value mutable " else "value " in
         [make_tag s loc (line ^ s)]
       (* method virtual (private)? s : t *)
-    | Ast.CrVir(loc, s, mb, t) -> 
-        let line = if (mb_bool mb) then "method virtual private " else "method virtual " in
+    | Ast.CrVir(loc, s, pf, t) -> 
+        let line = if (pf_bool pf) then "method virtual private " else "method virtual " in
         [make_tag s loc (line ^ s)]
       (* value virtual (private)? s : t *)
-    | Ast.CrVvr(loc, s, mb, t) -> 
-        let line = if (mb_bool mb) then "value virtual private " else "value virtual " in
+    | Ast.CrVvr(loc, s, mf, t) -> 
+        let line = if (mf_bool mf) then "value virtual mutable" else "value virtual " in
         [make_tag s loc (line ^ s)]
     | _ -> []
 
@@ -282,9 +299,9 @@ struct
       (* ce e *)
       Ast.CeApp(loc, ce, e) -> class_expr_info ce 
       (* (virtual)? i ([ t ])? *)
-    | Ast.CeCon(loc, mb, i, t) -> 
+    | Ast.CeCon(loc, vf, i, t) -> 
         let tag_name = ident_tagname i in
-        let line = if (mb_bool mb) then "class virtual " else "class " in
+        let line = if (vf_bool vf) then "class virtual " else "class " in
         [make_tag tag_name loc (line ^ tag_name)]
       (* fun p -> ce *)
     | Ast.CeFun(loc, p, ce) -> (class_expr_info ce)
