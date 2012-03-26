@@ -1,0 +1,6 @@
+
+To generate from cvs, do:
+
+aclocal -I m4
+autoconf
+automake --add-missing
