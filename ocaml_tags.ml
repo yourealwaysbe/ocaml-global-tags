@@ -60,7 +60,7 @@ struct
         let mod_name_rest = String.sub filename 
                                        (end_dir_pos + 1) 
                                        (name_len - 1) in
-        let mod_name = (String.capitalize mod_name_first) ^ mod_name_rest in
+        let mod_name = (String.capitalize_ascii mod_name_first) ^ mod_name_rest in
         Printf.printf "%s\t%d\t%s\t%s\n" file_name 0 filename "Module file";
         Printf.printf "%s\t%d\t%s\t%s\n" mod_name 0 filename ("Module " ^ mod_name)
     with _ -> (* oh well, we tried *) ()
@@ -204,7 +204,7 @@ struct
       (* value s : t *)
     | Ast.SgVal(loc, s, t) -> [make_tag s loc ("value " ^ s)]
       (* type t *)
-    | Ast.SgTyp(loc, t) -> (ctyp_info t)
+    | Ast.SgTyp(loc, s, t) -> (ctyp_info t)
     | _ -> []
 
   and module_expr_info ast = 
@@ -346,7 +346,7 @@ struct
       (* value (rec)? bi *)
     | Ast.StVal(loc, mb, bi) -> (binding_info bi)
       (* type t *)
-    | Ast.StTyp(loc, t) -> (ctyp_info t)
+    | Ast.StTyp(loc, s, t) -> (ctyp_info t)
     | _ -> []
 
   (* print_interf shall be called on .mli files *)
